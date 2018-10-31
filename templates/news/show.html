@@ -1,0 +1,10 @@
+<div class="page-header">
+  <h1>News#Show</h1>
+</div>
+
+<ul class="list-unstyled list-inline">
+  <li class="list-inline-item"><a href="<%= newsPath() %>" class="btn btn-info">Back to all News</a></li>
+  <li class="list-inline-item"><a href="<%= editNewsPath({ news_id: news.ID })%>" class="btn btn-warning">Edit</a></li>
+  <li class="list-inline-item"><a href="<%= newsPath({ news_id: news.ID })%>" data-method="DELETE" data-confirm="Are you sure?" class="btn btn-danger">Destroy</a>
+</ul>
+
