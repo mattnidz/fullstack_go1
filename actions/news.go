@@ -1,42 +1,46 @@
 package actions
 
-import "github.com/gobuffalo/buffalo"
+import (
+	"fmt"
+	"time"
 
-type NewsResource struct {
-	buffalo.Resource
+	"github.com/gobuffalo/buffalo"
+	"github.com/gocolly/colly"
+)
+
+type Story struct {
+	Rank  string
+	Title string
+	URL   string
 }
 
-// List default implementation.
-func (v NewsResource) List(c buffalo.Context) error {
-	return c.Render(200, r.String("News#List"))
+type topStoriesSnapshot struct {
+	Stories []Story
+	FoundAt time.Time
 }
 
-// Show default implementation.
-func (v NewsResource) Show(c buffalo.Context) error {
-	return c.Render(200, r.String("News#Show"))
+func CreateStory(e *colly.HTMLElement) Story {
+	rank := e.ChildText(".rank")
+	url := e.ChildAttr(".storylink", "href")
+	title := e.ChildText(".storylink")
+
+	return Story{Rank: rank, URL: url, Title: title}
 }
 
-// New default implementation.
-func (v NewsResource) New(c buffalo.Context) error {
-	return c.Render(200, r.String("News#New"))
-}
+// NewsList default implementation.
+func NewsList(c buffalo.Context) error {
+	a := colly.NewCollector()
+	snapshot := topStoriesSnapshot{FoundAt: time.Now()}
 
-// Create default implementation.
-func (v NewsResource) Create(c buffalo.Context) error {
-	return c.Render(200, r.String("News#Create"))
-}
+	a.OnHTML(".athing", func(e *colly.HTMLElement) {
+		story := CreateStory(e)
+		snapshot.Stories = append(snapshot.Stories, story)
+	})
 
-// Edit default implementation.
-func (v NewsResource) Edit(c buffalo.Context) error {
-	return c.Render(200, r.String("News#Edit"))
-}
+	a.Visit("https://news.ycombinator.com")
+	fmt.Println(snapshot)
 
-// Update default implementation.
-func (v NewsResource) Update(c buffalo.Context) error {
-	return c.Render(200, r.String("News#Update"))
-}
+	//return c.Render(200, r.HTML("news/list.html"))
+	return c.Render(200, r.JSON(snapshot))
 
-// Destroy default implementation.
-func (v NewsResource) Destroy(c buffalo.Context) error {
-	return c.Render(200, r.String("News#Destroy"))
 }
